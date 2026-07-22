@@ -50,14 +50,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </Badge>
         ) : null}
       </div>
-      <div className="flex flex-1 flex-col gap-1 bg-surface p-3 group-hover:bg-surface-lime">
-        <h3 className="font-heading text-base font-bold leading-snug text-foreground">
+      <div className="flex min-h-24 flex-1 flex-col gap-1 bg-surface p-3 group-hover:bg-surface-lime sm:min-h-0">
+        <h3 className="line-clamp-2 font-heading text-base font-bold leading-snug text-foreground">
           {product.title}
         </h3>
         <Price
           price={product.price}
           compareAtPrice={product.compareAtPrice}
           size="sm"
+          className="mt-auto"
         />
       </div>
     </Link>
