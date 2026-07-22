@@ -1,0 +1,88 @@
+/* Duck Donuts — bold contrast + signature graphic energy */
+
+:root {
+  /* Core — high contrast */
+  --background: #eaf5f7; /* Pale sky from brand strip */
+  --foreground: #252d89; /* Navy from brand strip */
+  --muted: #eaf5f7;
+  --muted-foreground: #252d89;
+  --border: #252d89;
+  --ring: #00a2e1; /* Vibrant blue */
+
+  /* Brand accents */
+  --accent: #00a2e1;
+  --accent-foreground: #ffffff;
+  --accent-soft: #00a2e1;
+  --highlight: #fef5e1; /* Cream separator */
+  --highlight-foreground: #252d89;
+  --warning: #f59123;
+  --danger: #d81b7a;
+  --success: #00956e;
+
+  /* Section slabs */
+  --surface: #ffffff;
+  --surface-sweetness: #f9c4d2;
+  --surface-sky: #00a2e1;
+  --surface-cotton: #f9c4d2;
+  --surface-cream: #fef5e1;
+  --surface-navy: #252d89;
+  --surface-navy-foreground: #fef5e1;
+  --surface-frost: #00a2e1;
+  --surface-frost-foreground: #ffffff;
+  --surface-raspberry: #d81b7a;
+  --surface-raspberry-foreground: #ffffff;
+  --surface-orange: #f59123;
+  --surface-orange-foreground: #252d89;
+  --surface-lime: #d3e16c;
+  --surface-lime-foreground: #252d89;
+
+  /* Secondary brand pops */
+  --caribbean: #00a2e1;
+  --create: #788dc7;
+  --raspberry: #d81b7a;
+  --orange: #f59123;
+  --strawberry: #d0232a;
+  --lime: #d3e16c;
+  --mint: #b4dcb7;
+  --imagination: #593191;
+  --blackberry: #791446;
+  --red-orange: #f05522;
+  --whisper: #e5e0ef;
+  --sky-pale: #eaf5f7;
+  --buttercream: #f7f4ea;
+
+  /* Typography — Adobe Fonts kit yki4nse */
+  --font-heading: "degular", system-ui, sans-serif;
+  --font-subtitle: "eldwin-script", Georgia, cursive;
+  --font-body: "degular", system-ui, sans-serif;
+  --font-weight-heading: 800;
+  --font-weight-subtitle: 900;
+  --font-weight-body: 400;
+
+  /* Radii — soft but graphic (not pill-everything) */
+  --radius-card: 1rem;
+  --radius-button: 0.75rem;
+  --radius-image: 0.75rem;
+  --radius-input: 0.75rem;
+  --radius-badge: 0.5rem;
+
+  /* Layout — asymmetric padding: more top (clear slant), less bottom */
+  --container-width: 72rem;
+  --page-padding: 1.25rem;
+  --section-spacing: 5rem;
+  --section-padding-top: 6.5rem;
+  --section-padding-bottom: 2.25rem;
+  --header-height: 4.5rem;
+  --border-width: 1px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-soft: none;
+  --shadow-lift: none;
+  --shadow-focus: 0 0 0 3px var(--accent);
+}

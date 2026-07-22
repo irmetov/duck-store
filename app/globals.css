@@ -1,26 +1,187 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "../styles/theme.css";
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --color-surface: var(--surface);
+  --color-surface-sweetness: var(--surface-sweetness);
+  --color-surface-sky: var(--surface-sky);
+  --color-surface-cotton: var(--surface-cotton);
+  --color-surface-cream: var(--surface-cream);
+  --color-surface-navy: var(--surface-navy);
+  --color-surface-navy-foreground: var(--surface-navy-foreground);
+  --color-surface-frost: var(--surface-frost);
+  --color-surface-frost-foreground: var(--surface-frost-foreground);
+  --color-surface-raspberry: var(--surface-raspberry);
+  --color-surface-raspberry-foreground: var(--surface-raspberry-foreground);
+  --color-surface-orange: var(--surface-orange);
+  --color-surface-orange-foreground: var(--surface-orange-foreground);
+  --color-surface-lime: var(--surface-lime);
+  --color-surface-lime-foreground: var(--surface-lime-foreground);
+
+  --color-caribbean: var(--caribbean);
+  --color-create: var(--create);
+  --color-raspberry: var(--raspberry);
+  --color-orange: var(--orange);
+  --color-strawberry: var(--strawberry);
+  --color-lime: var(--lime);
+  --color-mint: var(--mint);
+  --color-imagination: var(--imagination);
+  --color-blackberry: var(--blackberry);
+  --color-red-orange: var(--red-orange);
+  --color-whisper: var(--whisper);
+  --color-sky-pale: var(--sky-pale);
+  --color-buttercream: var(--buttercream);
+
+  --font-heading: var(--font-heading);
+  --font-subtitle: var(--font-subtitle);
+  --font-body: var(--font-body);
+  --font-sans: var(--font-body);
+
+  --radius-card: var(--radius-card);
+  --radius-button: var(--radius-button);
+  --radius-image: var(--radius-image);
+  --radius-input: var(--radius-input);
+  --radius-badge: var(--radius-badge);
+
+  --spacing-page: var(--page-padding);
+  --spacing-section: var(--section-spacing);
+  --spacing-header: var(--header-height);
+  --max-width-container: var(--container-width);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-focus: var(--shadow-focus);
+
+  --animate-duration-fast: var(--duration-fast);
+  --animate-duration-normal: var(--duration-normal);
+  --animate-duration-slow: var(--duration-slow);
+
+  --ease-out: var(--ease-out);
+  --ease-spring: var(--ease-spring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: "kern" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading text-foreground tracking-tight;
+    font-weight: var(--font-weight-heading);
+  }
+
+  a {
+    @apply transition-colors duration-normal;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  ::selection {
+    background: var(--raspberry);
+    color: #ffffff;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility duration-fast {
+  transition-duration: var(--duration-fast);
+}
+
+@utility duration-normal {
+  transition-duration: var(--duration-normal);
+}
+
+@utility duration-slow {
+  transition-duration: var(--duration-slow);
+}
+
+@utility rounded-card {
+  border-radius: var(--radius-card);
+}
+
+@utility rounded-button {
+  border-radius: var(--radius-button);
+}
+
+@utility rounded-image {
+  border-radius: var(--radius-image);
+}
+
+@utility rounded-input {
+  border-radius: var(--radius-input);
+}
+
+@utility rounded-badge {
+  border-radius: var(--radius-badge);
+}
+
+@utility border-graphic {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--border);
+}
+
+/* Asymmetric section padding — room under incoming slant, tight above outgoing slant */
+@utility py-section {
+  padding-top: var(--section-padding-top);
+  padding-bottom: var(--section-padding-bottom);
+}
+
+@utility pt-section {
+  padding-top: var(--section-padding-top);
+}
+
+@utility pb-section {
+  padding-bottom: var(--section-padding-bottom);
+}
+
+/* Section slant edges via <SectionSlantEdge /> — no clip on section itself */
+@utility section-slant {
+  position: relative;
+}
+
+@utility section-slant-alt {
+  position: relative;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
