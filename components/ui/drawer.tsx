@@ -33,7 +33,7 @@ export function Drawer({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-surface-navy" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/30" />
         <Dialog.Content
           className={cn(
             "fixed inset-y-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-background outline-none transition-transform duration-slow ease-out",

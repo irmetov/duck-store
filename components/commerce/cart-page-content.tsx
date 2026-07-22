@@ -45,7 +45,7 @@ export function CartPageContent() {
           ))}
         </div>
 
-        <aside className="h-fit rounded-card border border-border bg-surface-sky p-6">
+        <aside className="h-fit rounded-card border border-border bg-surface-cream p-6">
           <div className="flex items-center justify-between font-heading text-lg font-semibold">
             <span>Subtotal</span>
             <Price price={cart.cost.subtotalAmount} />

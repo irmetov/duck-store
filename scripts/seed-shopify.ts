@@ -1,30 +1,95 @@
 /**
  * Seeds Shopify with sample Duck Donuts rubber duck products + collections.
  *
- * Requires Admin API credentials (Custom App with write_products):
- *   SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
+ * Requires Admin API credentials via either:
  *   SHOPIFY_ADMIN_ACCESS_TOKEN=shpat_...
+ * or (Dev Dashboard — preferred):
+ *   SHOPIFY_CLIENT_ID=...
+ *   SHOPIFY_CLIENT_SECRET=...
+ *
+ * Also requires:
+ *   SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
  *   SHOPIFY_API_VERSION=2025-01 (optional)
  *
  * Usage:
- *   npx tsx scripts/seed-shopify.ts
+ *   npm run seed
  */
 
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { seedCollections, seedProducts } from "./seed-data";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN;
-const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 const apiVersion = process.env.SHOPIFY_API_VERSION || "2025-01";
+const clientId = process.env.SHOPIFY_CLIENT_ID;
+const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
-if (!domain || !adminToken) {
-  console.error(
-    "Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_ACCESS_TOKEN.\n" +
-      "Create a Custom App in Shopify Admin with write_products / write_files scopes.",
-  );
+let adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+
+if (!domain) {
+  console.error("Missing SHOPIFY_STORE_DOMAIN.");
   process.exit(1);
+}
+
+async function resolveAdminToken(): Promise<string> {
+  if (adminToken?.trim()) return adminToken.trim();
+
+  if (!clientId?.trim() || !clientSecret?.trim()) {
+    console.error(
+      "Missing Admin credentials.\n" +
+        "Set SHOPIFY_ADMIN_ACCESS_TOKEN, or SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET\n" +
+        "from Dev Dashboard → Duck-Shop-Dev → Settings.",
+    );
+    process.exit(1);
+  }
+
+  console.log("Requesting Admin access token via client credentials…");
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: clientId.trim(),
+    client_secret: clientSecret.trim(),
+  });
+
+  const response = await fetch(
+    `https://${domain}/admin/oauth/access_token`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    },
+  );
+
+  const text = await response.text();
+  let json: {
+    access_token?: string;
+    scope?: string;
+    error?: string;
+    error_description?: string;
+  };
+  try {
+    json = JSON.parse(text) as typeof json;
+  } catch {
+    console.error(`Token request failed (HTTP ${response.status}):\n${text.slice(0, 500)}`);
+    process.exit(1);
+  }
+
+  if (!response.ok || !json.access_token) {
+    console.error(
+      `Token request failed (HTTP ${response.status}): ` +
+        `${json.error ?? "unknown"} ${json.error_description ?? text.slice(0, 300)}`,
+    );
+    process.exit(1);
+  }
+
+  console.log("Admin access token acquired.");
+  console.log(`Granted scopes: ${json.scope ?? "(none returned)"}`);
+  if (json.scope && !json.scope.split(",").map((s) => s.trim()).includes("read_products")) {
+    console.warn(
+      "Note: token has no read_products — seeding will create only (no skip-if-exists checks).",
+    );
+  }
+  return json.access_token;
 }
 
 type GqlResponse<T> = {
@@ -120,20 +185,25 @@ async function stagedUpload(filePath: string, filename: string) {
   return target.resourceUrl;
 }
 
-async function ensureCollection(handle: string, title: string, description: string) {
-  const existing = await adminFetch<{
-    collectionByHandle: { id: string } | null;
-  }>(
-    `#graphql
-      query CollectionByHandle($handle: String!) {
-        collectionByHandle(handle: $handle) { id }
-      }
-    `,
-    { handle },
-  );
+async function ensureCollection(
+  handle: string,
+  title: string,
+  description: string,
+): Promise<string | null> {
+  const fromEnv = process.env[`SHOPIFY_COLLECTION_${handle.toUpperCase()}_ID`];
+  if (fromEnv?.trim()) {
+    const id = fromEnv.includes("gid://")
+      ? fromEnv.trim()
+      : `gid://shopify/Collection/${fromEnv.trim()}`;
+    await writeSeedStateCollection(handle, id);
+    console.log(`Collection from env: ${handle}`);
+    return id;
+  }
 
-  if (existing.collectionByHandle?.id) {
-    return existing.collectionByHandle.id;
+  const cachedId = await readSeedStateCollection(handle);
+  if (cachedId) {
+    console.log(`Collection from seed state: ${handle}`);
+    return cachedId;
   }
 
   const created = await adminFetch<{
@@ -159,32 +229,89 @@ async function ensureCollection(handle: string, title: string, description: stri
     },
   );
 
-  if (created.collectionCreate.userErrors.length) {
-    throw new Error(created.collectionCreate.userErrors.map((e) => e.message).join("; "));
+  const id = created.collectionCreate.collection?.id;
+  if (id) {
+    await writeSeedStateCollection(handle, id);
+    return id;
   }
 
-  const id = created.collectionCreate.collection?.id;
-  if (!id) throw new Error(`Failed to create collection ${handle}`);
-  return id;
+  const messages = created.collectionCreate.userErrors.map((e) => e.message).join("; ");
+  const alreadyExists = /taken|exists|already/i.test(messages);
+  if (alreadyExists) {
+    const existingId = await lookupCollectionIdViaStorefront(handle);
+    if (existingId) {
+      await writeSeedStateCollection(handle, existingId);
+      console.log(`Collection already exists, reusing: ${handle}`);
+      return existingId;
+    }
+    // Allow seeding products without collection IDs; user can assign later in Admin.
+    console.warn(
+      `Collection "${handle}" already exists — skipping link for now.\n` +
+        `  Fix later: delete it at https://admin.shopify.com/store/duck-store-93gsru0s/collections then re-seed,\n` +
+        `  or open the collection and set SHOPIFY_COLLECTION_${handle.toUpperCase()}_ID=<numeric id from URL>.`,
+    );
+    return null;
+  }
+
+  throw new Error(messages || `Failed to create collection ${handle}`);
+}
+
+const seedStatePath = path.join(process.cwd(), ".seed-state.json");
+
+async function readSeedStateCollection(handle: string): Promise<string | null> {
+  try {
+    const raw = await readFile(seedStatePath, "utf8");
+    const state = JSON.parse(raw) as { collections?: Record<string, string> };
+    return state.collections?.[handle] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeSeedStateCollection(handle: string, id: string) {
+  let state: { collections: Record<string, string> } = { collections: {} };
+  try {
+    const raw = await readFile(seedStatePath, "utf8");
+    state = JSON.parse(raw) as typeof state;
+    state.collections ??= {};
+  } catch {
+    // fresh state
+  }
+  state.collections[handle] = id;
+  await writeFile(seedStatePath, `${JSON.stringify(state, null, 2)}\n`);
+}
+
+async function lookupCollectionIdViaStorefront(handle: string): Promise<string | null> {
+  const storefrontToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+  if (!storefrontToken) return null;
+
+  const response = await fetch(
+    `https://${domain}/api/${apiVersion}/graphql.json`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": storefrontToken,
+      },
+      body: JSON.stringify({
+        query: `#graphql
+          query ($handle: String!) {
+            collection(handle: $handle) { id }
+          }
+        `,
+        variables: { handle },
+      }),
+    },
+  );
+
+  if (!response.ok) return null;
+  const json = (await response.json()) as {
+    data?: { collection: { id: string } | null };
+  };
+  return json.data?.collection?.id ?? null;
 }
 
 async function createProduct(product: (typeof seedProducts)[number], imageUrl: string) {
-  const existing = await adminFetch<{
-    productByHandle: { id: string } | null;
-  }>(
-    `#graphql
-      query ProductByHandle($handle: String!) {
-        productByHandle(handle: $handle) { id }
-      }
-    `,
-    { handle: product.handle },
-  );
-
-  if (existing.productByHandle?.id) {
-    console.log(`Skip existing product: ${product.handle}`);
-    return existing.productByHandle.id;
-  }
-
   const created = await adminFetch<{
     productCreate: {
       product: { id: string; variants: { nodes: { id: string }[] } } | null;
@@ -192,18 +319,18 @@ async function createProduct(product: (typeof seedProducts)[number], imageUrl: s
     };
   }>(
     `#graphql
-      mutation ProductCreate($input: ProductInput!) {
-        productCreate(input: $input) {
+      mutation ProductCreate($product: ProductCreateInput!, $media: [CreateMediaInput!]) {
+        productCreate(product: $product, media: $media) {
           product {
             id
             variants(first: 1) { nodes { id } }
           }
-          userErrors { message }
+          userErrors { field message }
         }
       }
     `,
     {
-      input: {
+      product: {
         title: product.title,
         handle: product.handle,
         descriptionHtml: `<p>${product.description}</p>`,
@@ -211,8 +338,14 @@ async function createProduct(product: (typeof seedProducts)[number], imageUrl: s
         vendor: product.vendor,
         tags: product.tags,
         status: "ACTIVE",
-        images: [{ src: imageUrl, altText: product.imageAlt }],
       },
+      media: [
+        {
+          originalSource: imageUrl,
+          alt: product.imageAlt,
+          mediaContentType: "IMAGE",
+        },
+      ],
     },
   );
 
@@ -226,22 +359,25 @@ async function createProduct(product: (typeof seedProducts)[number], imageUrl: s
     throw new Error(`Failed to create product ${product.handle}`);
   }
 
+  // Newer APIs prefer productVariantsBulkUpdate over productVariantUpdate
   await adminFetch(
     `#graphql
-      mutation ProductVariantUpdate($input: ProductVariantInput!) {
-        productVariantUpdate(input: $input) {
-          userErrors { message }
+      mutation ProductVariantsBulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+        productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+          userErrors { field message }
         }
       }
     `,
     {
-      input: {
-        id: variantId,
-        price: product.price,
-        compareAtPrice: product.compareAtPrice,
-        sku: product.sku,
-        inventoryItem: { tracked: false },
-      },
+      productId,
+      variants: [
+        {
+          id: variantId,
+          price: product.price,
+          compareAtPrice: product.compareAtPrice,
+          inventoryItem: { sku: product.sku, tracked: false },
+        },
+      ],
     },
   );
 
@@ -265,6 +401,7 @@ async function addProductsToCollection(collectionId: string, productIds: string[
 }
 
 async function main() {
+  adminToken = await resolveAdminToken();
   console.log("Seeding Duck Donuts rubber duckies…");
 
   const collectionIds = new Map<string, string>();
@@ -274,8 +411,10 @@ async function main() {
       collection.title,
       collection.description,
     );
-    collectionIds.set(collection.handle, id);
-    console.log(`Collection ready: ${collection.handle}`);
+    if (id) {
+      collectionIds.set(collection.handle, id);
+      console.log(`Collection ready: ${collection.handle}`);
+    }
   }
 
   const productsDir = path.join(process.cwd(), "public/images/products");
