@@ -87,11 +87,15 @@ export async function shopifyFetch<T>({
   const json = (await response.json()) as ShopifyResponse<T>;
 
   if (json.errors?.length) {
+    // Shopify often returns partial data with field-level access errors.
+    // Prefer data when present so PDP/listings still render.
     console.error("[shopifyFetch] GraphQL errors", json.errors);
-    throw new ShopifyError(
-      json.errors.map((error) => error.message).join("; ") || "Shopify GraphQL error.",
-      502,
-    );
+    if (!json.data) {
+      throw new ShopifyError(
+        json.errors.map((error) => error.message).join("; ") || "Shopify GraphQL error.",
+        502,
+      );
+    }
   }
 
   if (!json.data) {

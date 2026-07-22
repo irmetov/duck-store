@@ -63,7 +63,6 @@ const PRODUCT_FRAGMENT = `#graphql
           id
           title
           availableForSale
-          quantityAvailable
           sku
           selectedOptions {
             name
