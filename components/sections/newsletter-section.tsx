@@ -8,12 +8,24 @@ import { SectionMark } from "@/components/ui/graphic";
 import { Heading } from "@/components/ui/heading";
 import { SectionSlantEdge } from "@/components/ui/section-slant-edge";
 import { Subtitle } from "@/components/ui/subtitle";
-import { subscribeNewsletterAction } from "@/lib/newsletter-actions";
+import { storeConfig } from "@/config/store";
 
 type NewsletterSectionProps = {
   title: string;
   subtitle: string;
 };
+
+type FormSubmitResponse = {
+  success?: string | boolean;
+  message?: string;
+};
+
+function inboxAddress() {
+  return (
+    process.env.NEXT_PUBLIC_NEWSLETTER_TO_EMAIL?.trim() ||
+    storeConfig.contactEmail
+  );
+}
 
 export function NewsletterSection({ title, subtitle }: NewsletterSectionProps) {
   const [email, setEmail] = useState("");
@@ -26,20 +38,64 @@ export function NewsletterSection({ title, subtitle }: NewsletterSectionProps) {
     event.preventDefault();
     if (!email.trim() || status === "loading") return;
 
-    setStatus("loading");
-    setError(null);
-
-    const formData = new FormData(event.currentTarget);
-    const result = await subscribeNewsletterAction(formData);
-
-    if (result.ok) {
+    const form = event.currentTarget;
+    const honeypot = new FormData(form).get("company");
+    if (String(honeypot ?? "").trim()) {
       setStatus("success");
-      setEmail("");
       return;
     }
 
-    setStatus("error");
-    setError(result.error);
+    setStatus("loading");
+    setError(null);
+
+    const normalized = email.trim().toLowerCase();
+    const to = inboxAddress();
+
+    try {
+      const response = await fetch(
+        `https://formsubmit.co/ajax/${encodeURIComponent(to)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            email: normalized,
+            _subject: `${storeConfig.name} — flock signup`,
+            _template: "table",
+            _captcha: "false",
+            message: `${normalized} wants duck drops from the website.`,
+          }),
+        },
+      );
+
+      const data = (await response.json().catch(() => null)) as FormSubmitResponse | null;
+      const failed =
+        !response.ok ||
+        data?.success === false ||
+        data?.success === "false";
+
+      if (failed) {
+        const message = data?.message ?? "";
+        if (/activation/i.test(message)) {
+          throw new Error(
+            "Almost there — check the inbox for a one-time FormSubmit activation link, then try again.",
+          );
+        }
+        throw new Error("Couldn't add you to the flock. Try again in a moment.");
+      }
+
+      setStatus("success");
+      setEmail("");
+    } catch (submitError) {
+      setStatus("error");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Couldn't add you to the flock. Try again in a moment.",
+      );
+    }
   }
 
   return (
@@ -69,7 +125,6 @@ export function NewsletterSection({ title, subtitle }: NewsletterSectionProps) {
             <label className="sr-only" htmlFor="newsletter-email">
               Email address
             </label>
-            {/* Honeypot for bots */}
             <input
               type="text"
               name="company"
