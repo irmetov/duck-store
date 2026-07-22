@@ -61,27 +61,27 @@ export const homepageSections: HomepageSection[] = [
   {
     type: "hero",
     props: {
-      headline: "Rubber duckies, Duck Donuts style",
+      headline: "Meet the Duck Donuts flock",
       subheadline:
-        "Collectible ducks with icing energy, sprinkle joy, and Outer Banks heart.",
+        "Official rubber duckies from the brand born on the Outer Banks — bright, collectible, and ready to quack.",
       ctaLabel: "Shop the flock",
       ctaHref: "/products",
       imageSrc: "/images/hero-rubber-ducky.jpg",
-      imageAlt: "Duck Donuts rubber ducky in a donut floatie",
+      imageAlt: "Duck Donuts rubber ducky collectible",
     },
   },
   {
     type: "featured-products",
     props: {
-      title: "Fresh from the flock",
-      subtitle: "Our most-loved rubber duckies, ready to splash into your cart.",
+      title: "Crowd favorites",
+      subtitle: "The ducks collectors keep coming back for.",
       limit: 8,
     },
   },
   {
     type: "collection-grid",
     props: {
-      title: "Find your flavor",
+      title: "Find your duck",
       subtitle: "Classics, seasonal drops, and limited editions.",
       handles: ["classics", "seasonal", "limited"],
     },
@@ -89,8 +89,8 @@ export const homepageSections: HomepageSection[] = [
   {
     type: "split-content",
     props: {
-      title: "The tale of Duck Donuts",
-      body: "The dream of Duck Donuts was hatched on a family vacation in the Outer Banks of North Carolina. That same playful spirit now lives in our rubber duckie collectibles — bright, custom, and made to make you smile.",
+      title: "Born on the Outer Banks",
+      body: "Duck Donuts started on a family vacation in North Carolina’s Outer Banks. That same playful spirit now lives in our rubber duckie collectibles — cheerful little companions made to brighten a desk, a shelf, or a sunny day.",
       ctaLabel: "Meet the ducks",
       ctaHref: "/products",
       imageSrc: "/images/hero-rubber-ducky.jpg",
@@ -101,9 +101,10 @@ export const homepageSections: HomepageSection[] = [
   {
     type: "image-banner",
     props: {
-      title: "Warm. Delicious. Quack-tastic.",
-      subtitle: "Build your flock with playful duckies inspired by our made-to-order magic.",
-      ctaLabel: "Start shopping",
+      title: "More ducks. More joy.",
+      subtitle:
+        "Collectible rubber duckies from Duck Donuts — for shelves, soaks, desks, and anyone who needs a tiny co-pilot.",
+      ctaLabel: "Quack me to the shop",
       ctaHref: "/products",
       tone: "frost",
     },
@@ -112,7 +113,7 @@ export const homepageSections: HomepageSection[] = [
     type: "newsletter",
     props: {
       title: "Stay in the flock",
-      subtitle: "New drops, limited ducks, and sprinkle-worthy surprises.",
+      subtitle: "Be first to hear about new drops and limited ducks.",
     },
   },
 ];

@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
@@ -41,7 +40,6 @@ export async function addToCartAction(merchandiseId: string, quantity = 1) {
     const cart = await ensureCart();
     const updated = await addCartLines(cart.id, [{ merchandiseId, quantity }]);
     await setCartId(updated.id);
-    revalidateTag("cart", "max");
     return { ok: true as const, cart: updated };
   } catch (error) {
     console.error("[addToCartAction]", error);
@@ -59,7 +57,6 @@ export async function updateCartLineAction(lineId: string, quantity: number) {
     if (!cartId) return { ok: false as const, error: "Your cart is empty." };
 
     const updated = await updateCartLines(cartId, [{ id: lineId, quantity }]);
-    revalidateTag("cart", "max");
     return { ok: true as const, cart: updated };
   } catch (error) {
     console.error("[updateCartLineAction]", error);
@@ -73,7 +70,6 @@ export async function removeCartLineAction(lineId: string) {
     if (!cartId) return { ok: false as const, error: "Your cart is empty." };
 
     const updated = await removeCartLines(cartId, [lineId]);
-    revalidateTag("cart", "max");
     return { ok: true as const, cart: updated };
   } catch (error) {
     console.error("[removeCartLineAction]", error);

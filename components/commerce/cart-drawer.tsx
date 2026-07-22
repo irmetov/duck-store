@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
@@ -15,16 +15,21 @@ import { CartItem } from "./cart-item";
 import { useCart } from "./cart-provider";
 
 export function CartDrawer() {
-  const { cart, isOpen, closeCart, isPending } = useCart();
+  const { cart, isOpen, closeCart, isPending, error, clearError } = useCart();
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [checkoutPending, startCheckout] = useTransition();
   const lines = cart?.lines ?? [];
   const isEmpty = lines.length === 0;
+  const displayError = checkoutError ?? error;
 
   return (
     <Drawer
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) closeCart();
+        if (!open) {
+          setCheckoutError(null);
+          closeCart();
+        }
       }}
       title="Your cart"
       description={
@@ -42,13 +47,23 @@ export function CartDrawer() {
             <Text size="sm" tone="muted">
               {storeConfig.shippingNote}
             </Text>
+            {displayError ? (
+              <p role="alert" className="text-sm text-danger">
+                {displayError}
+              </p>
+            ) : null}
             <Button
               size="lg"
               className="w-full"
               disabled={checkoutPending || isPending}
               onClick={() => {
+                clearError();
+                setCheckoutError(null);
                 startCheckout(async () => {
-                  await redirectToCheckoutAction();
+                  const result = await redirectToCheckoutAction();
+                  if (result && !result.ok) {
+                    setCheckoutError(result.error);
+                  }
                 });
               }}
             >

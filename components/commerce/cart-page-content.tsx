@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { useCart } from "@/components/commerce/cart-provider";
 import { CartItem } from "@/components/commerce/cart-item";
@@ -14,9 +14,11 @@ import { storeConfig } from "@/config/store";
 import { redirectToCheckoutAction } from "@/lib/shopify/cart-actions";
 
 export function CartPageContent() {
-  const { cart, isPending } = useCart();
+  const { cart, isPending, error, clearError } = useCart();
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [checkoutPending, startCheckout] = useTransition();
   const lines = cart?.lines ?? [];
+  const displayError = checkoutError ?? error;
 
   if (!cart || !lines.length) {
     return (
@@ -53,14 +55,24 @@ export function CartPageContent() {
           <Text size="sm" tone="muted" className="mt-3">
             {storeConfig.shippingNote}
           </Text>
+          {displayError ? (
+            <p role="alert" className="mt-3 text-sm text-danger">
+              {displayError}
+            </p>
+          ) : null}
           <Button
             type="button"
             size="lg"
             className="mt-6 w-full"
             disabled={checkoutPending || isPending}
             onClick={() => {
+              clearError();
+              setCheckoutError(null);
               startCheckout(async () => {
-                await redirectToCheckoutAction();
+                const result = await redirectToCheckoutAction();
+                if (result && !result.ok) {
+                  setCheckoutError(result.error);
+                }
               });
             }}
           >

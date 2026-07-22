@@ -1,4 +1,4 @@
-import { seedProducts } from "@/scripts/seed-data";
+import { seedProducts } from "@/config/seed-data";
 import type {
   Collection,
   CollectionWithProducts,
@@ -25,6 +25,7 @@ export function getDemoProducts(): ProductCardData[] {
     id: `demo-${product.handle}`,
     handle: product.handle,
     title: product.title,
+    productType: product.productType,
     featuredImage: productImage(product.imageFile, product.imageAlt),
     price: money(product.price),
     compareAtPrice: product.compareAtPrice ? money(product.compareAtPrice) : null,
@@ -56,17 +57,16 @@ export function getDemoProductByHandle(handle: string): Product | null {
       {
         id: `demo-option-${product.handle}`,
         name: "Title",
-        values: ["Default"],
+        values: ["Default Title"],
       },
     ],
     variants: [
       {
         id: `demo-variant-${product.handle}`,
-        title: "Default",
+        title: "Default Title",
         availableForSale: true,
-        quantityAvailable: 25,
         sku: product.sku,
-        selectedOptions: [{ name: "Title", value: "Default" }],
+        selectedOptions: [{ name: "Title", value: "Default Title" }],
         price,
         compareAtPrice,
         image,

@@ -35,7 +35,7 @@ export function FeaturedProductsSection({
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
             <Subtitle size="sm" className="text-raspberry">
-              Fresh from the flock
+              Fan favorites
             </Subtitle>
             <Heading as="h2" size="xl" className="mt-1">
               {title}

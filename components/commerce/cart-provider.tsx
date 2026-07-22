@@ -25,8 +25,10 @@ type CartContextValue = {
   totalQuantity: number;
   isOpen: boolean;
   isPending: boolean;
+  error: string | null;
   openCart: () => void;
   closeCart: () => void;
+  clearError: () => void;
   setCart: (cart: Cart | null) => void;
   refreshCart: () => Promise<void>;
   updateLine: (lineId: string, quantity: number) => void;
@@ -42,10 +44,18 @@ type CartProviderProps = {
 export function CartProvider({ children }: CartProviderProps) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const openCart = useCallback(() => setIsOpen(true), []);
-  const closeCart = useCallback(() => setIsOpen(false), []);
+  const clearError = useCallback(() => setError(null), []);
+  const openCart = useCallback(() => {
+    setError(null);
+    setIsOpen(true);
+  }, []);
+  const closeCart = useCallback(() => {
+    setError(null);
+    setIsOpen(false);
+  }, []);
 
   const refreshCart = useCallback(async () => {
     try {
@@ -74,18 +84,24 @@ export function CartProvider({ children }: CartProviderProps) {
 
   const updateLine = useCallback((lineId: string, quantity: number) => {
     startTransition(async () => {
+      setError(null);
       const result = await updateCartLineAction(lineId, quantity);
       if (result.ok) {
         setCart(result.cart);
+      } else {
+        setError(result.error);
       }
     });
   }, []);
 
   const removeLine = useCallback((lineId: string) => {
     startTransition(async () => {
+      setError(null);
       const result = await removeCartLineAction(lineId);
       if (result.ok) {
         setCart(result.cart);
+      } else {
+        setError(result.error);
       }
     });
   }, []);
@@ -96,8 +112,10 @@ export function CartProvider({ children }: CartProviderProps) {
       totalQuantity: cart?.totalQuantity ?? 0,
       isOpen,
       isPending,
+      error,
       openCart,
       closeCart,
+      clearError,
       setCart,
       refreshCart,
       updateLine,
@@ -107,8 +125,10 @@ export function CartProvider({ children }: CartProviderProps) {
       cart,
       isOpen,
       isPending,
+      error,
       openCart,
       closeCart,
+      clearError,
       refreshCart,
       updateLine,
       removeLine,

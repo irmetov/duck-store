@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ProductGrid } from "@/components/commerce/product-grid";
+import { ProductCatalog } from "@/components/commerce/product-catalog";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -19,7 +19,6 @@ type SearchParams = Promise<{
   sort?: string;
   availability?: string;
   type?: string;
-  after?: string;
 }>;
 
 const SORT_OPTIONS: { label: string; value: string; sortKey: ProductSort; reverse: boolean }[] = [
@@ -46,6 +45,10 @@ export default async function ProductsPage({
 
   const sortOption =
     SORT_OPTIONS.find((option) => option.value === params.sort) ?? SORT_OPTIONS[0]!;
+  const productQuery = buildQuery({
+    availability: params.availability,
+    type: params.type,
+  });
 
   let products: ProductCardData[] = [];
   let hasNextPage = false;
@@ -54,13 +57,9 @@ export default async function ProductsPage({
   try {
     const result = await getProducts({
       first: 24,
-      after: params.after,
       sortKey: sortOption.sortKey,
       reverse: sortOption.reverse,
-      query: buildQuery({
-        availability: params.availability,
-        type: params.type,
-      }),
+      query: productQuery,
     });
     products = result.products;
     hasNextPage = result.pageInfo.hasNextPage;
@@ -97,6 +96,12 @@ export default async function ProductsPage({
     return query ? `/products?${query}` : "/products";
   };
 
+  const catalogKey = [
+    sortOption.value,
+    params.availability ?? "",
+    params.type ?? "",
+  ].join("|");
+
   return (
     <Container className="py-12 sm:py-16">
       <div className="mb-8 max-w-2xl">
@@ -104,7 +109,7 @@ export default async function ProductsPage({
           Shop all ducks
         </Heading>
         <Text tone="muted" className="mt-2">
-          Bright collectibles with icing energy and Outer Banks heart.
+          Bright Duck Donuts rubber duckies inspired by our Outer Banks roots.
         </Text>
       </div>
 
@@ -140,16 +145,15 @@ export default async function ProductsPage({
       </div>
 
       {products.length ? (
-        <>
-          <ProductGrid products={products} />
-          {hasNextPage && endCursor ? (
-            <div className="mt-10 flex justify-center">
-              <Button asChild variant="outline">
-                <Link href={filterHref({ after: endCursor })}>Load more</Link>
-              </Button>
-            </div>
-          ) : null}
-        </>
+        <ProductCatalog
+          key={catalogKey}
+          initialProducts={products}
+          initialHasNextPage={hasNextPage}
+          initialEndCursor={endCursor}
+          sortKey={sortOption.sortKey}
+          reverse={sortOption.reverse}
+          query={productQuery}
+        />
       ) : (
         <EmptyState
           title="No products match"

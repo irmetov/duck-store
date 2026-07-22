@@ -20,7 +20,6 @@ export type ProductVariant = {
   id: string;
   title: string;
   availableForSale: boolean;
-  quantityAvailable: number | null;
   sku: string | null;
   selectedOptions: { name: string; value: string }[];
   price: Money;
@@ -60,6 +59,7 @@ export type ProductCardData = {
   id: string;
   handle: string;
   title: string;
+  productType?: string;
   featuredImage: ShopifyImage | null;
   price: Money;
   compareAtPrice: Money | null;

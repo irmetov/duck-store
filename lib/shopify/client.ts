@@ -1,4 +1,9 @@
-const domain = process.env.SHOPIFY_STORE_DOMAIN;
+import {
+  sanitizeStoreDomain,
+  storefrontAuthHeaders,
+} from "./env";
+
+const domain = sanitizeStoreDomain(process.env.SHOPIFY_STORE_DOMAIN);
 const storefrontAccessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 const apiVersion = process.env.SHOPIFY_API_VERSION || "2025-01";
 
@@ -32,14 +37,6 @@ export class ShopifyError extends Error {
 
 export function isShopifyConfigured() {
   return Boolean(domain && storefrontAccessToken);
-}
-
-/** Private Headless tokens (shpat_…) use a different header than public tokens. */
-function storefrontAuthHeaders(token: string): Record<string, string> {
-  if (token.startsWith("shpat_")) {
-    return { "Shopify-Storefront-Private-Token": token };
-  }
-  return { "X-Shopify-Storefront-Access-Token": token };
 }
 
 export async function shopifyFetch<T>({

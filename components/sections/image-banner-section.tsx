@@ -50,7 +50,7 @@ export function ImageBannerSection({
           size="md"
           className={lightText ? "text-surface-lime" : "text-raspberry"}
         >
-          Made for you
+          Ready when you are
         </Subtitle>
         <Heading
           as="h2"

@@ -24,17 +24,6 @@ export function getImageRadiusClass() {
   }
 }
 
-export function getButtonRadiusClass() {
-  switch (themeConfig.components.buttonStyle) {
-    case "square":
-      return "rounded-none";
-    case "soft":
-      return "rounded-button";
-    case "pill":
-      return "rounded-full";
-  }
-}
-
 export function getCardHoverClass() {
   switch (themeConfig.interaction.cardHover) {
     case "zoom":

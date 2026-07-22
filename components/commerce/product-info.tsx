@@ -64,7 +64,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </div>
       </div>
 
-      {product.description ? (
+      {product.descriptionHtml ? (
+        <div
+          className="prose prose-sm max-w-prose text-muted-foreground [&_a]:text-accent [&_p]:mb-3"
+          dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+        />
+      ) : product.description ? (
         <Text tone="muted" className="max-w-prose">
           {product.description}
         </Text>

@@ -31,7 +31,7 @@ export function CollectionGridSection({
       <Container className="relative">
         <div className="mb-10 max-w-xl">
           <Subtitle size="sm" className="text-surface-navy">
-            Pick a flavor
+            Shop by collection
           </Subtitle>
           <Heading as="h2" size="xl" className="mt-1">
             {title}

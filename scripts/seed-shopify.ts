@@ -18,19 +18,26 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { seedCollections, seedProducts } from "./seed-data";
+import {
+  adminStoreSlug,
+  sanitizeStoreDomain,
+  storefrontAuthHeaders,
+} from "../lib/shopify/env";
+import { seedCollections, seedProducts } from "../config/seed-data";
 
-const domain = process.env.SHOPIFY_STORE_DOMAIN;
+const rawDomain = sanitizeStoreDomain(process.env.SHOPIFY_STORE_DOMAIN);
 const apiVersion = process.env.SHOPIFY_API_VERSION || "2025-01";
 const clientId = process.env.SHOPIFY_CLIENT_ID;
 const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
 let adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 
-if (!domain) {
+if (!rawDomain) {
   console.error("Missing SHOPIFY_STORE_DOMAIN.");
   process.exit(1);
 }
+
+const domain: string = rawDomain;
 
 async function resolveAdminToken(): Promise<string> {
   if (adminToken?.trim()) return adminToken.trim();
@@ -247,7 +254,7 @@ async function ensureCollection(
     // Allow seeding products without collection IDs; user can assign later in Admin.
     console.warn(
       `Collection "${handle}" already exists — skipping link for now.\n` +
-        `  Fix later: delete it at https://admin.shopify.com/store/duck-store-93gsru0s/collections then re-seed,\n` +
+        `  Fix later: delete it at https://admin.shopify.com/store/${adminStoreSlug(domain)}/collections then re-seed,\n` +
         `  or open the collection and set SHOPIFY_COLLECTION_${handle.toUpperCase()}_ID=<numeric id from URL>.`,
     );
     return null;
@@ -291,7 +298,7 @@ async function lookupCollectionIdViaStorefront(handle: string): Promise<string |
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": storefrontToken,
+        ...storefrontAuthHeaders(storefrontToken),
       },
       body: JSON.stringify({
         query: `#graphql

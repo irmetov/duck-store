@@ -95,7 +95,6 @@ export function normalizeProduct(node: {
     id: string;
     title: string;
     availableForSale: boolean;
-    quantityAvailable?: number | null;
     sku?: string | null;
     selectedOptions: { name: string; value: string }[];
     price: RawMoney;
@@ -110,7 +109,6 @@ export function normalizeProduct(node: {
     id: variant.id,
     title: variant.title,
     availableForSale: variant.availableForSale,
-    quantityAvailable: variant.quantityAvailable ?? null,
     sku: variant.sku ?? null,
     selectedOptions: variant.selectedOptions,
     price: money(variant.price),

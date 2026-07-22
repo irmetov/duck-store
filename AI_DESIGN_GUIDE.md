@@ -12,7 +12,7 @@ Kit: `https://use.typekit.net/yki4nse.css` (loaded in `app/layout.tsx`)
 | Subtitles | Eldwin Script Black (900) | `--font-subtitle`, `Subtitle` |
 | Body | Degular Regular | `--font-body`, `Text` |
 
-Logo: `public/images/duckdonuts-logo.svg` (`currentColor` fill — inherits text color)
+Logo: inline `BrandLogo` component (`currentColor` fill — inherits text color)
 
 - Theme tokens in `styles/theme.css` and `app/globals.css`
 - `lib/theme/theme-config.ts`, `theme-types.ts`, `theme-utils.ts`

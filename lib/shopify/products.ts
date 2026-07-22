@@ -77,8 +77,10 @@ export async function getProducts({
     if (query?.includes("available_for_sale:true")) {
       products = products.filter((product) => product.availableForSale);
     }
-    if (query?.includes("product_type:")) {
-      products = products.filter((product) => product.title.length > 0);
+    const typeMatch = query?.match(/product_type:"([^"]+)"/);
+    if (typeMatch?.[1]) {
+      const productType = typeMatch[1];
+      products = products.filter((product) => product.productType === productType);
     }
 
     products = sortDemoProducts(products, sortKey, reverse);

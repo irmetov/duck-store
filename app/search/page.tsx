@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           Search
         </Heading>
         <Text tone="muted" className="mt-2">
-          Find your favorite flavor of duck.
+          Find your favorite duck in the flock.
         </Text>
       </div>
 

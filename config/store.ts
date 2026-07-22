@@ -1,8 +1,8 @@
 export const storeConfig = {
   name: "Duck Donuts",
-  tagline: "Warm, playful, and made for you.",
+  tagline: "Official Duck Donuts rubber duckies.",
   description:
-    "Official Duck Donuts rubber duckies and branded collectibles. Bright, cheerful ducks inspired by our Outer Banks roots.",
+    "Collectible rubber duckies from Duck Donuts — bright, playful companions inspired by our Outer Banks roots.",
   currency: "USD",
   contactEmail: "hello@duckdonuts.com",
   socialLinks: {
