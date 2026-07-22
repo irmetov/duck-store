@@ -64,7 +64,7 @@ export function NewsletterSection({ title, subtitle }: NewsletterSectionProps) {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="mx-auto mt-8 flex w-full max-w-lg flex-col gap-3 sm:flex-row"
+            className="mx-auto mt-8 flex w-full max-w-lg flex-col gap-3 sm:flex-row sm:items-stretch"
             noValidate
           >
             <label className="sr-only" htmlFor="newsletter-email">
@@ -88,13 +88,14 @@ export function NewsletterSection({ title, subtitle }: NewsletterSectionProps) {
               value={email}
               disabled={status === "loading"}
               onChange={(event) => setEmail(event.target.value)}
-              className="h-12 flex-1 rounded-button border-graphic bg-surface px-5 font-body text-foreground placeholder:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+              className="box-border h-12 min-h-12 w-full appearance-none rounded-button border-graphic bg-surface px-5 text-base leading-normal text-foreground placeholder:text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 sm:min-w-0 sm:flex-1"
             />
             <Button
               type="submit"
               size="lg"
               variant="secondary"
               disabled={status === "loading"}
+              className="h-12 w-full shrink-0 sm:w-auto"
             >
               {status === "loading" ? "Quacking…" : "Hop in"}
             </Button>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { CartProvider } from "@/components/commerce/cart-provider";
-import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { storeConfig } from "@/config/store";
@@ -38,7 +37,6 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-full flex-col bg-background font-body text-foreground">
         <CartProvider>
-          <AnnouncementBar />
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />

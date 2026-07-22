@@ -38,17 +38,9 @@ export function HeroSection({
           <Text className="mt-4 max-w-md text-2xl leading-relaxed text-surface-navy-foreground">
             {subheadline}
           </Text>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8">
             <Button asChild size="lg" variant="primary">
               <Link href={ctaHref}>{ctaLabel}</Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="border-surface-navy-foreground bg-surface-navy text-surface-navy-foreground hover:border-surface-frost hover:bg-surface-frost hover:text-white"
-            >
-              <Link href="/collections/classics">Browse classics</Link>
             </Button>
           </div>
         </div>
