@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-
 import { primaryNavigation } from "@/config/navigation";
 import { cn } from "@/lib/utils/cn";
+
+import { NavHoverLink } from "./nav-hover-link";
 
 type MobileNavigationProps = {
   open: boolean;
@@ -20,15 +20,15 @@ export function MobileNavigation({ open, onOpenChange }: MobileNavigationProps) 
       )}
     >
       <nav aria-label="Mobile" className="flex flex-col px-page py-3">
-        {primaryNavigation.map((item) => (
-          <Link
+        {primaryNavigation.map((item, index) => (
+          <NavHoverLink
             key={item.href}
             href={item.href}
+            label={item.label}
+            index={index}
+            className="w-full justify-start px-2.5 py-1.5 font-heading font-semibold"
             onClick={() => onOpenChange(false)}
-            className="rounded-button px-4 py-3 font-heading text-base font-semibold text-foreground hover:bg-surface-sky"
-          >
-            {item.label}
-          </Link>
+          />
         ))}
       </nav>
     </div>

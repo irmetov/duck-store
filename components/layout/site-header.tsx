@@ -13,6 +13,7 @@ import { storeConfig } from "@/config/store";
 import { cn } from "@/lib/utils/cn";
 
 import { MobileNavigation } from "./mobile-navigation";
+import { NavHoverLink } from "./nav-hover-link";
 
 export function SiteHeader() {
   const { openCart, totalQuantity } = useCart();
@@ -43,14 +44,13 @@ export function SiteHeader() {
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-          {primaryNavigation.map((item) => (
-            <Link
+          {primaryNavigation.map((item, index) => (
+            <NavHoverLink
               key={item.href}
               href={item.href}
-              className="rounded-button px-4 py-2 font-body text-sm font-bold text-foreground hover:bg-surface-sky"
-            >
-              {item.label}
-            </Link>
+              label={item.label}
+              index={index}
+            />
           ))}
         </nav>
 
