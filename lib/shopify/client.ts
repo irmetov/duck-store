@@ -34,6 +34,14 @@ export function isShopifyConfigured() {
   return Boolean(domain && storefrontAccessToken);
 }
 
+/** Private Headless tokens (shpat_…) use a different header than public tokens. */
+function storefrontAuthHeaders(token: string): Record<string, string> {
+  if (token.startsWith("shpat_")) {
+    return { "Shopify-Storefront-Private-Token": token };
+  }
+  return { "X-Shopify-Storefront-Access-Token": token };
+}
+
 export async function shopifyFetch<T>({
   query,
   variables,
@@ -57,7 +65,7 @@ export async function shopifyFetch<T>({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": storefrontAccessToken,
+        ...storefrontAuthHeaders(storefrontAccessToken),
       },
       body: JSON.stringify({ query, variables }),
       cache,
